@@ -172,7 +172,25 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    foodCoeff, powerCoeff, ghostCoeff = 1, 1, 1
+    foodScore, powerScore, ghostScore = 0, 0, 0
+
+    currPos, currFood = currentGameState.getPacmanPosition(), currentGameState.getFood()
+    currGhostPos, currPower = currentGameState.getGhostPositions(), currentGameState.getCapsules()
+    scaredTimes = [ghostState.scaredTimer for ghostState in currentGameState.getGhostStates()]
+    isScared = True if max(scaredTimes)!=0 else False
+
+    closestFood = float(min([currFood.width + currFood.height] + [util.manhattanDistance(currPos, foodPos) for foodPos in currFood.asList()]))
+    closestGhost = float(min([util.manhattanDistance(currPos, ghostPos) for ghostPos in currGhostPos]))
+    closestPow = float(min([len(currPower)] + [util.manhattanDistance(powerPos, currPos) for powerPos in currPower]))
+
+    foodScore = 1 if len(currFood.asList())==0 else 1/closestFood
+    powerScore = 1 if len(currPower)==0 else 1/closestPow
+    ghostScore = -100 if closestGhost < 1 else 1/closestGhost
+
+    if isScared and closestGhost < max(scaredTimes):
+        ghostCoeff, ghostScore = 100, abs(ghostScore)
+        return foodCoeff*foodScore + ghostCoeff*ghostScore + powerCoeff*powerScore + currentGameState.getScore()
 
 # Abbreviation
 better = betterEvaluationFunction
